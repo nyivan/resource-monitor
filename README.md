@@ -1,12 +1,23 @@
 # Resource Monitoring Service
-Functional requirements
+## Requirements
 
-* Gather and persist the system's resources snapshots (cpu and memory at minimum) on each 30 seconds
-* Expose a historical view of the resources together with the current state of the resource
-* Use any language and framework of your choice
+Design and develop an operating system resource monitoring application.
+
+Requirements.
+Collect system resources every 30 seconds. Your application should be able to provide current state information along with historical data for the past 24h.
+Gather and expose CPU and memory consumption at the minimum. I/O operations, network traffic, disk usage etc. are an advantage.
+Presenting the results to the user is up to you. Options include, but are not limited to:
+Graphical representation
+Text representation
+Store the results to a database
+Create a client server implementation.
+
+
+Use an operating system of your choice.
+You can use one of these languages - Java, C#, C++, Python.
 
 ## Prerequisites
-* A running postgres server is needed for this solution 
+* A running postgres server is needed for this solution
 
 ## How to start the service
 #### run ./gradlew bootRun
