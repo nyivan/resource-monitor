@@ -40,6 +40,24 @@ public class ResourceQueryServiceImpl implements ResourceQueryService {
     }
 
     @Override
+    public CpuInfo getCurrentCpuInfo() {
+        var bean =
+                (com.sun.management.OperatingSystemMXBean)
+                        java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+        return new CpuInfo(Instant.now(), bean.getAvailableProcessors(), bean.getProcessCpuLoad(), bean.getProcessCpuTime(), bean.getSystemCpuLoad());
+    }
+
+    @Override
+    public MemoryInfo getCurrentMemoryInfo() {
+        var bean =
+                (com.sun.management.OperatingSystemMXBean)
+                        java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+        long totalSize = bean.getTotalPhysicalMemorySize();
+        long freeSize = bean.getFreePhysicalMemorySize();
+        return new MemoryInfo(Instant.now(), freeSize, totalSize, totalSize - freeSize);
+    }
+
+    @Override
     public Collection<MemoryInfo> getMemoryInfo(Instant from, Instant to) {
         validateParams(from, to);
         return memoryRepository.findByTimestampBetween(from, to);

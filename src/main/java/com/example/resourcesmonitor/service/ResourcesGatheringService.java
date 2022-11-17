@@ -13,7 +13,6 @@
 
 package com.example.resourcesmonitor.service;
 
-import java.time.Instant;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -34,39 +33,26 @@ public class ResourcesGatheringService {
     private final ScheduledExecutorService scheduledExecutorService;
     private final CpuRepository cpuRepository;
     private final MemoryRepository memoryRepository;
+    private final ResourceQueryService resourceQueryService;
 
     @Autowired
-    public ResourcesGatheringService(CpuRepository cpuRepository, MemoryRepository memoryRepository) {
-        this(Executors.newScheduledThreadPool(2), cpuRepository, memoryRepository);
+    public ResourcesGatheringService(CpuRepository cpuRepository, MemoryRepository memoryRepository,
+                                     ResourceQueryService resourceQueryService) {
+        this(Executors.newScheduledThreadPool(2), cpuRepository, memoryRepository, resourceQueryService);
     }
 
-    public ResourcesGatheringService(ScheduledExecutorService scheduledExecutorService, CpuRepository cpuRepository, MemoryRepository memoryRepository) {
+    public ResourcesGatheringService(ScheduledExecutorService scheduledExecutorService, CpuRepository cpuRepository, MemoryRepository memoryRepository, ResourceQueryService resourceQueryService) {
         this.scheduledExecutorService = scheduledExecutorService;
         this.scheduledExecutorService.scheduleWithFixedDelay(this::collectCpuInfo, INITIAL_DELAY, DELAY, TimeUnit.MILLISECONDS);
         this.scheduledExecutorService.scheduleWithFixedDelay(this::collectMemoryInfo, INITIAL_DELAY, DELAY, TimeUnit.MILLISECONDS);
         this.cpuRepository = cpuRepository;
         this.memoryRepository = memoryRepository;
-    }
-
-    public CpuInfo currentCpuInfo() {
-        var bean =
-                (com.sun.management.OperatingSystemMXBean)
-                        java.lang.management.ManagementFactory.getOperatingSystemMXBean();
-        return new CpuInfo(Instant.now(), bean.getAvailableProcessors(), bean.getProcessCpuLoad(), bean.getProcessCpuTime(), bean.getSystemCpuLoad());
-    }
-
-    public MemoryInfo currentMemoryInfo() {
-        var bean =
-                (com.sun.management.OperatingSystemMXBean)
-                        java.lang.management.ManagementFactory.getOperatingSystemMXBean();
-        long totalSize = bean.getTotalPhysicalMemorySize();
-        long freeSize = bean.getFreePhysicalMemorySize();
-        return new MemoryInfo(Instant.now(), freeSize, totalSize, totalSize - freeSize);
+        this.resourceQueryService = resourceQueryService;
     }
 
     private void collectCpuInfo() {
         runSafe(() -> {
-            CpuInfo cpuInfo = currentCpuInfo();
+            CpuInfo cpuInfo = resourceQueryService.getCurrentCpuInfo();
             log.info("CPU info collected: {}", cpuInfo);
             cpuRepository.save(cpuInfo);
             log.debug("CPU info persisted: {}", cpuInfo);
@@ -75,8 +61,7 @@ public class ResourcesGatheringService {
 
     private void collectMemoryInfo() {
         runSafe(() -> {
-
-            MemoryInfo memoryInfo = currentMemoryInfo();
+            MemoryInfo memoryInfo = resourceQueryService.getCurrentMemoryInfo();
             log.info("Memory info collected: {}", memoryInfo);
             memoryRepository.save(memoryInfo);
             log.debug("Memory info persisted: {}", memoryInfo);
