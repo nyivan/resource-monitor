@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    username: postgres
+    password: VMware1!
+    url: jdbc:postgresql://localhost:5432/resources
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
