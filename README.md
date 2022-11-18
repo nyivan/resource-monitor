@@ -16,7 +16,7 @@ Create a client server implementation.
 Use an operating system of your choice.
 You can use one of these languages - Java, C#, C++, Python.
 
-## Prerequisites
+## Prerequisites for the current solution
 * A running postgres server is needed for this solution
 
 ## How to start the service
